@@ -1,0 +1,13 @@
+build
+dist
+ezipset.egg-info
+venvpython
+activate
+otherlibs
+figlet*
+beta*
+rc*.py
+*.gz
+backup
+tests
+venv

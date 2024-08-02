@@ -1,0 +1,6 @@
+exclude tests/*
+exclude ezipset/debugezipset.py
+incluse ezipset/ipset.man.html
+incluse ezipset/test_ezipset.py
+include CHANGELOG.md
+include README.md
