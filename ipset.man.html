@@ -1,0 +1,1449 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of IPSET</TITLE>
+</HEAD><BODY>
+<H1>IPSET</H1>
+Section:  (8)<BR>Updated: Jun 25, 2015<BR><A HREF="#index">Index</A>
+<!-- <A HREF="/cgi-bin/man/man2html">Return to Main Contents</A>--><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+ipset --- administration tool for IP sets
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>ipset</B> [ <I>OPTIONS</I> ] <I>COMMAND</I> [ <I>COMMAND-OPTIONS</I> ]
+<P>
+
+COMMANDS := { <B>create</B> | <B>add</B> | <B>del</B> | <B>test</B> | <B>destroy</B> | <B>list</B> | <B>save</B> | <B>restore</B> | <B>flush</B> | <B>rename</B> | <B>swap</B> | <B>help</B> | <B>version</B> | <B>-</B> }
+<P>
+
+<I>OPTIONS</I> := { <B>-exist</B> | <B>-output</B> { <B>plain</B> | <B>save</B> | <B>xml</B> } | <B>-quiet</B> | <B>-resolve</B> | <B>-sorted</B> | <B>-name</B> | <B>-terse</B> | <B>-file</B> <I>filename</I> }
+<P>
+
+<B>ipset</B> <B>create</B> <I>SETNAME</I> <I>TYPENAME</I> [ <I>CREATE-OPTIONS</I> ]
+<P>
+
+<B>ipset</B> <B>add</B> <I>SETNAME</I> <I>ADD-ENTRY</I> [ <I>ADD-OPTIONS</I> ]
+<P>
+
+<B>ipset</B> <B>del</B> <I>SETNAME</I> <I>DEL-ENTRY</I> [ <I>DEL-OPTIONS</I> ]
+<P>
+
+<B>ipset</B> <B>test</B> <I>SETNAME</I> <I>TEST-ENTRY</I> [ <I>TEST-OPTIONS</I> ]
+<P>
+
+<B>ipset</B> <B>destroy</B> [ <I>SETNAME</I> ]
+<P>
+
+<B>ipset</B> <B>list</B> [ <I>SETNAME</I> ]
+<P>
+
+<B>ipset</B> <B>save</B> [ <I>SETNAME</I> ]
+<P>
+
+<B>ipset</B> <B>restore</B>
+<P>
+
+<B>ipset</B> <B>flush</B> [ <I>SETNAME</I> ]
+<P>
+
+<B>ipset</B> <B>rename</B> <I>SETNAME-FROM</I> <I>SETNAME-TO</I>
+<P>
+
+<B>ipset</B> <B>swap</B> <I>SETNAME-FROM</I> <I>SETNAME-TO</I>
+<P>
+
+<B>ipset</B> <B>help</B> [ <I>TYPENAME</I> ]
+<P>
+
+<B>ipset</B> <B>version</B>
+<P>
+
+<B>ipset</B> <B>-</B>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>ipset</B>
+is used to set up, maintain and inspect so called IP sets in the Linux
+kernel. Depending on the type of the set, an IP set may store IP(v4/v6)
+addresses, (TCP/UDP) port numbers, IP and MAC address pairs, IP address
+and port number pairs, etc. See the set type definitions below.
+<P>
+
+<B>Iptables</B>
+matches and targets referring to sets create references, which
+protect the given sets in the kernel. A set cannot be destroyed
+while there is a single reference pointing to it.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+The options that are recognized by
+<B>ipset</B>
+can be divided into several different groups.
+<A NAME="lbAF">&nbsp;</A>
+<H3>COMMANDS</H3>
+
+These options specify the desired action to perform.  Only one of them
+can be specified on the command line unless otherwise specified below.
+For all the long versions of the command names, you need to use only enough
+letters to ensure that
+<B>ipset</B>
+can differentiate it from all other commands. The
+<B>ipset</B>
+parser follows the order here when looking for the shortest match
+in the long command names.
+<DL COMPACT>
+<DT><B>n</B>, <B>create</B> <I>SETNAME</I> <I>TYPENAME</I> [ <I>CREATE-OPTIONS</I> ]<DD>
+Create a set identified with setname and specified type. The type may require
+type specific options. If the
+<B>-exist</B>
+option is specified,
+<B>ipset</B>
+ignores the error otherwise raised when the same set (setname and create parameters
+are identical) already exists.
+<DT><B>add</B> <I>SETNAME</I> <I>ADD-ENTRY</I> [ <I>ADD-OPTIONS</I> ]<DD>
+Add a given entry to the set. If the
+<B>-exist</B>
+option is specified,
+<B>ipset</B>
+ignores if the entry already added to the set.
+<DT><B>del</B> <I>SETNAME</I> <I>DEL-ENTRY</I> [ <I>DEL-OPTIONS</I> ]<DD>
+Delete an entry from a set. If the
+<B>-exist</B>
+option is specified and the entry is not in the set (maybe already expired),
+then the command is ignored.
+<DT><B>test</B> <I>SETNAME</I> <I>TEST-ENTRY</I> [ <I>TEST-OPTIONS</I> ]<DD>
+Test whether an entry is in a set or not. Exit status number is zero
+if the tested entry is in the set and nonzero if it is missing from
+the set.
+<DT><B>x</B>, <B>destroy</B> [ <I>SETNAME</I> ]<DD>
+Destroy the specified set or all the sets if none is given.
+<P>
+If the set has got reference(s), nothing is done and no set destroyed.
+<DT><B>list</B> [ <I>SETNAME</I> ] [ <I>OPTIONS</I> ]<DD>
+List the header data and the entries for the specified set, or for
+all sets if none is given. The
+<B>-resolve</B>
+option can be used to force name lookups (which may be slow). When the
+<B>-sorted</B>
+option is given, the entries are listed/saved sorted (which may be slow).
+The option
+<B>-output</B>
+can be used to control the format of the listing:
+<B>plain</B>, <B>save</B> or <B>xml</B>.
+(The default is
+<B>plain</B>.)
+If the option
+<B>-name</B>
+is specified, just the names of the existing sets are listed. If the option
+<B>-terse</B>
+is specified, just the set names and headers are listed. The output is printed
+to stdout, the option
+<B>-file</B>
+can be used to specify a filename instead of stdout.
+<DT><B>save</B> [ <I>SETNAME</I> ]<DD>
+Save the given set, or all sets if none is given
+to stdout in a format that
+<B>restore</B>
+can read. The option
+<B>-file</B>
+can be used to specify a filename instead of stdout.
+<DT><B>restore</B><DD>
+Restore a saved session generated by
+<B>save</B>.
+The saved session can be fed from stdin or the option
+<B>-file</B>
+can be used to specify a filename instead of stdin.
+<P>
+Please note, existing sets and elements are not erased by
+<B>restore</B> unless specified so in the restore file. All commands
+are allowed in restore mode except <B>list</B>, <B>help</B>,
+<B>version</B>, interactive mode and <B>restore</B> itself.
+<DT><B>flush</B> [ <I>SETNAME</I> ]<DD>
+Flush all entries from the specified set or flush
+all sets if none is given.
+<DT><B>e</B>, <B>rename</B> <I>SETNAME-FROM</I> <I>SETNAME-TO</I><DD>
+Rename a set. Set identified by
+<I>SETNAME-TO</I>
+must not exist.
+<DT><B>w</B>, <B>swap</B> <I>SETNAME-FROM</I> <I>SETNAME-TO</I><DD>
+Swap the content of two sets, or in another words, 
+exchange the name of two sets. The referred sets must exist and
+compatible type of sets can be swapped only.
+<DT><B>help</B> [ <I>TYPENAME</I> ]<DD>
+Print help and set type specific help if
+<I>TYPENAME</I>
+is specified.
+<DT><B>version</B><DD>
+Print program version.
+<DT><B>-</B><DD>
+If a dash is specified as command, then
+<B>ipset</B>
+enters a simple interactive mode and the commands are read from the standard input.
+The interactive mode can be finished by entering the pseudo-command
+<B>quit</B>.
+</DL>
+<P>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>OTHER OPTIONS</H3>
+
+The following additional options can be specified. The long option names
+cannot be abbreviated.
+<DL COMPACT>
+<DT><B>-!</B>, <B>-exist</B><DD>
+Ignore errors when exactly the same set is to be created or already
+added entry is added or missing entry is deleted.
+<DT><B>-o</B>, <B>-output</B> { <B>plain</B> | <B>save</B> | <B>xml</B> }<DD>
+Select the output format to the
+<B>list</B>
+command.
+<DT><B>-q</B>, <B>-quiet</B><DD>
+Suppress any output to stdout and stderr.
+<B>ipset</B>
+will still exit with error if it cannot continue.
+<DT><B>-r</B>, <B>-resolve</B><DD>
+When listing sets, enforce name lookup. The 
+program will try to display the IP entries resolved to 
+host names which requires
+<B>slow</B>
+DNS lookups.
+<DT><B>-s</B>, <B>-sorted</B><DD>
+Sorted output. When listing or saving sets, the entries are listed sorted.
+<DT><B>-n</B>, <B>-name</B><DD>
+List just the names of the existing sets, i.e. suppress listing of set headers and members.
+<DT><B>-t</B>, <B>-terse</B><DD>
+List the set names and headers, i.e. suppress listing of set members.
+<DT><B>-f</B>, <B>-file</B> <I>filename</I><DD>
+Specify a filename to print into instead of stdout
+(<B>list</B>
+or
+<B>save</B>
+commands) or read from instead of stdin
+(<B>restore</B>
+command).
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>INTRODUCTION</H2>
+
+A set type comprises of the storage method by which the data is stored and
+the data type(s) which are stored in the set. Therefore the
+<I>TYPENAME</I>
+parameter of the
+<B>create</B> 
+command follows the syntax
+<P>
+<I>TYPENAME</I> := <I>method</I><B>:</B><I>datatype</I>[<B>,</B><I>datatype</I>[<B>,</B><I>datatype</I>]]
+<P>
+where the current list of the methods are
+<B>bitmap</B>, <B>hash</B>, and <B>list</B> and the possible data types
+are <B>ip</B>, <B>net</B>, <B>mac</B>, <B>port</B> and <B>iface</B>.
+The dimension of a set is equal to the number of data types in its type name.
+<P>
+When adding, deleting or testing entries in a set, the same comma separated
+data syntax must be used for the entry parameter of the commands, i.e
+<DL COMPACT>
+<DT><DD>
+ipset add foo ipaddr,portnum,ipaddr
+</DL>
+<P>
+
+If host names or service names with dash in the name are used instead of IP
+addresses or service numbers, then the host name or service name must be enclosed
+in square brackets. Example:
+<DL COMPACT>
+<DT><DD>
+ipset add foo [test-hostname],[ftp-data]
+</DL>
+<P>
+
+In the case of host names the DNS resolver is called internally
+by <B>ipset</B> but if it returns multiple IP addresses, only the
+first one is used.
+<P>
+The <B>bitmap</B> and <B>list</B> types use a fixed sized storage. The <B>hash</B>
+types use a hash to store the elements. In order to avoid clashes in the hash,
+a limited number of chaining, and if that is exhausted, the doubling of the hash size
+is performed when adding entries by the
+<B>ipset</B>
+command. When entries added by the
+<B>SET</B>
+target of
+<B>iptables/ip6tables</B>,
+then the hash size is fixed and the set won't be duplicated, even if the new
+entry cannot be added to the set.
+<A NAME="lbAI">&nbsp;</A>
+<H2>GENERIC CREATE AND ADD OPTIONS</H2>
+
+<A NAME="lbAJ">&nbsp;</A>
+<H3>timeout</H3>
+
+All set types supports the optional <B>timeout</B>
+parameter when creating a set and adding entries. The value of the <B>timeout</B>
+parameter for the <B>create</B> command means the default timeout value (in seconds)
+for new entries. If a set is created with timeout support, then the same 
+<B>timeout</B> option can be used to specify non-default timeout values
+when adding entries. Zero timeout value means the entry is added permanent to the set.
+The timeout value of already added elements can be changed by re-adding the element
+using the <B>-exist</B> option. The largest possible timeout value is 2147483
+(in seconds). Example:
+<DL COMPACT>
+<DT><DD>
+ipset create test hash:ip timeout 300
+<DT><DD>
+ipset add test 192.168.0.1 timeout 60
+<DT><DD>
+ipset -exist add test 192.168.0.1 timeout 600
+</DL>
+<P>
+
+When listing the set, the number of entries printed in the header might be
+larger than the listed number of entries for sets with the timeout extensions:
+the number of entries in the set is updated when elements added/deleted to the
+set and periodically when the garbage collector evicts the timed out entries.
+<P>
+
+<A NAME="lbAK">&nbsp;</A>
+<H3>counters, packets, bytes</H3>
+
+All set types support the optional <B>counters</B>
+option when creating a set. If the option is specified then the set is created
+with packet and byte counters per element support. The packet and byte counters
+are initialized to zero when the elements are (re-)added to the set,
+unless the packet and byte counter values are explicitly specified by the
+<B>packets</B> and <B>bytes</B> options. An example when an element is added
+to a set with non-zero counter values:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip counters
+<DT><DD>
+ipset add foo 192.168.1.1 packets 42 bytes 1024
+</DL>
+<P>
+
+<A NAME="lbAL">&nbsp;</A>
+<H3>comment</H3>
+
+All set types support the optional <B>comment</B> extension.
+Enabling this extension on an ipset enables you to annotate an ipset entry with
+an arbitrary string. This string is completely ignored by both the kernel and ipset
+itself and is purely for providing a convenient means to document the reason for an
+entry's existence. Comments must not contain any quotation marks and the usual escape
+character (\) has no meaning. For example, the following shell command is illegal:
+<DL COMPACT>
+<DT><DD>
+ipset add foo 1.1.1.1 comment &quot;this comment is \&quot;bad\&quot;&quot;
+</DL>
+<P>
+
+In the above, your shell will of course escape the quotation marks and ipset will see
+the quote marks in the argument for the comment, which will result in a parse error.
+If you are writing your own system, you should avoid creating comments containing a
+quotation mark if you do not want to break &quot;ipset save&quot; and &quot;ipset restore&quot;,
+nonetheless, the kernel will not stop you from doing so. The following is perfectly
+acceptable:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip comment
+<DT><DD>
+ipset add foo 192.168.1.1/24 comment &quot;allow access to SMB share on \\\\fileserv\\&quot;
+<DT><DD>
+the above would appear as: &quot;allow access to SMB share on \\fileserv\&quot;
+</DL>
+<P>
+
+<A NAME="lbAM">&nbsp;</A>
+<H3>skbinfo, skbmark, skbprio, skbqueue</H3>
+
+All set types support the optional <B>skbinfo</B> extension. This extension allows you to
+store the metainfo (firewall mark, tc class and hardware queue) with every entry and map it to
+packets by usage of SET netfilter target with --map-set option.
+<B>skbmark</B> option format: <B>MARK</B> or <B>MARK/MASK</B>, where <B>MARK</B> and <B>MASK</B> are 32bit hex
+numbers with 0x prefix. If only <B>mark</B> is specified mask 0xffffffff are used.
+<B>skbprio</B> option has tc class format: <B>MAJOR:MINOR</B>, where <B>major</B> and <B>minor</B> numbers
+are hex without 0x prefix.
+<B>skbqueue</B> option is just decimal number.
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip skbinfo
+<DT><DD>
+ipset add foo skbmark 0x1111/0xff00ffff skbprio 1:10 skbqueue 10
+</DL>
+<P>
+
+<A NAME="lbAN">&nbsp;</A>
+<H3>hashsize</H3>
+
+This parameter is valid for the <B>create</B> command of all <B>hash</B> type sets.
+It defines the initial hash size for the set, default is 1024. The hash size must be a power
+of two, the kernel automatically rounds up non power of two hash sizes to the first
+correct value.
+Example:
+<DL COMPACT>
+<DT><DD>
+ipset create test hash:ip hashsize 1536
+</DL>
+<P>
+
+<A NAME="lbAO">&nbsp;</A>
+<H3>maxelem</H3>
+
+This parameter is valid for the <B>create</B> command of all <B>hash</B> type sets.
+It does define the maximal number of elements which can be stored in the set, default 65536.
+Example:
+<DL COMPACT>
+<DT><DD>
+ipset create test hash:ip maxelem 2048.
+</DL>
+<P>
+
+<A NAME="lbAP">&nbsp;</A>
+<H3>family { inet | inet6 }</H3>
+
+This parameter is valid for the <B>create</B> command of all <B>hash</B> type sets
+except for hash:mac.
+It defines the protocol family of the IP addresses to be stored in the set. The default is
+<B>inet</B>, i.e IPv4.
+For the <B>inet</B> family one can add or delete multiple entries by specifying
+a range or a network of IPv4 addresses in the IP address part of the entry:
+<P>
+
+<I>ipaddr</I> := { <I>ip</I> | <I>fromaddr</I>-<I>toaddr</I> | <I>ip</I>/<I>cidr</I> }
+<P>
+
+<I>netaddr</I> := { <I>fromaddr</I>-<I>toaddr</I> | <I>ip</I>/<I>cidr</I> }
+<P>
+
+Example:
+<DL COMPACT>
+<DT><DD>
+ipset create test hash:ip family inet6
+</DL>
+<P>
+
+<A NAME="lbAQ">&nbsp;</A>
+<H3>nomatch</H3>
+
+The <B>hash</B> set types which can store <B>net</B> type of data (i.e. hash:*net*)
+support the optional <B>nomatch</B>
+option when adding entries. When matching elements in the set, entries marked
+as <B>nomatch</B> are skipped as if those were not added to the set, which makes
+possible to build up sets with exceptions. See the example at hash type
+<B>hash:net</B> below.
+<P>
+When elements are tested by <B>ipset</B>, the <B>nomatch</B>
+flags are taken into account. If one wants to test the existence of an element
+marked with <B>nomatch</B> in a set, then the flag must be specified too.
+<A NAME="lbAR">&nbsp;</A>
+<H3>forceadd</H3>
+
+All hash set types support the optional <B>forceadd</B> parameter when creating a set.
+When sets created with this option become full the next addition to the set may
+succeed and evict a random entry from the set.
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip forceadd
+</DL>
+<P>
+
+<A NAME="lbAS">&nbsp;</A>
+<H2>SET TYPES</H2>
+
+<A NAME="lbAT">&nbsp;</A>
+<H3>bitmap:ip</H3>
+
+The <B>bitmap:ip</B> set type uses a memory range to store either IPv4 host
+(default) or IPv4 network addresses. A <B>bitmap:ip</B> type of set can store up
+to 65536 entries.
+<P>
+
+<I>CREATE-OPTIONS</I> := <B>range</B> <I>fromip</I>-<I>toip</I>|<I>ip</I>/<I>cidr</I> [ <B>netmask</B> <I>cidr</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := { <I>ip</I> | <I>fromip</I>-<I>toip</I> | <I>ip</I>/<I>cidr</I> }
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := { <I>ip</I> | <I>fromip</I>-<I>toip</I> | <I>ip</I>/<I>cidr</I> }
+<P>
+
+<I>TEST-ENTRY</I> := <I>ip</I>
+<P>
+
+Mandatory <B>create</B> options:
+<DL COMPACT>
+<DT><B>range</B> <I>fromip</I>-<I>toip</I>|<I>ip</I>/<I>cidr</I><DD>
+Create the set from the specified inclusive address range expressed in an
+IPv4 address range or network. The size of the range (in entries) cannot exceed
+the limit of maximum 65536 elements.
+</DL>
+<P>
+
+Optional <B>create</B> options:
+<DL COMPACT>
+<DT><B>netmask</B> <I>cidr</I><DD>
+When the optional <B>netmask</B> parameter specified, network addresses will be 
+stored in the set instead of IP host addresses. The <I>cidr</I> prefix value must be
+between 1-32.
+An IP address will be in the set if the network address, which is resulted by
+masking the address with the specified netmask, can be found in the set.
+</DL>
+<P>
+
+The <B>bitmap:ip</B> type supports adding or deleting multiple entries in one
+command.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo bitmap:ip range 192.168.0.0/16
+<DT><DD>
+ipset add foo 192.168.1/24
+<DT><DD>
+ipset test foo 192.168.1.1
+</DL>
+<A NAME="lbAU">&nbsp;</A>
+<H3>bitmap:ip,mac</H3>
+
+The <B>bitmap:ip,mac</B> set type uses a memory range to store IPv4 and a MAC address pairs. A <B>bitmap:ip,mac</B> type of set can store up to 65536 entries.
+<P>
+
+<I>CREATE-OPTIONS</I> := <B>range</B> <I>fromip</I>-<I>toip</I>|<I>ip</I>/<I>cidr</I> [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ip</I>[,<I>macaddr</I>]
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ip</I>[,<I>macaddr</I>]
+<P>
+
+<I>TEST-ENTRY</I> := <I>ip</I>[,<I>macaddr</I>]
+<P>
+
+Mandatory options to use when creating a <B>bitmap:ip,mac</B> type of set:
+<DL COMPACT>
+<DT><B>range</B> <I>fromip</I>-<I>toip</I>|<I>ip</I>/<I>cidr</I><DD>
+Create the set from the specified inclusive address range expressed in an
+IPv4 address range or network. The size of the range cannot exceed the limit
+of maximum 65536 entries.
+</DL>
+<P>
+
+The <B>bitmap:ip,mac</B> type is exceptional in the sense that the MAC part can
+be left out when adding/deleting/testing entries in the set. If we add an entry
+without the MAC address specified, then when the first time the entry is
+matched by the kernel, it will automatically fill out the missing MAC address with the
+MAC address from the packet. The source MAC address is used if the entry matched
+due to a <B>src</B> parameter of the <B>set</B> match, and the destination MAC
+address is used if available and the entry matched due to a <B>dst</B> parameter.
+If the entry was specified with a timeout value, the timer starts off when the
+IP and MAC address pair is complete.
+<P>
+
+The <B>bitmap:ip,mac</B> type of sets require two <B>src/dst</B> parameters of
+the <B>set</B> match and <B>SET</B> target netfilter kernel modules. For matches
+on destination MAC addresses, see COMMENTS below.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo bitmap:ip,mac range 192.168.0.0/16
+<DT><DD>
+ipset add foo 192.168.1.1,12:34:56:78:9A:BC
+<DT><DD>
+ipset test foo 192.168.1.1
+</DL>
+<A NAME="lbAV">&nbsp;</A>
+<H3>bitmap:port</H3>
+
+The <B>bitmap:port</B> set type uses a memory range to store port numbers
+and such a set can store up to 65536 ports.
+<P>
+
+<I>CREATE-OPTIONS</I> := <B>range</B> <I>fromport</I>-<I>toport [ </I><B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := { <I>[proto:]port</I> | <I>[proto:]fromport</I>-<I>toport</I> }
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := { <I>[proto:]port</I> | <I>[proto:]fromport</I>-<I>toport</I> }
+<P>
+
+<I>TEST-ENTRY</I> := <I>[proto:]port</I>
+<P>
+
+Mandatory options to use when creating a <B>bitmap:port</B> type of set:
+<DL COMPACT>
+<DT><B>range</B> <I>[proto:]fromport</I>-<I>toport</I><DD>
+Create the set from the specified inclusive port range.
+</DL>
+<P>
+
+The <B>set</B> match and <B>SET</B> target netfilter kernel modules interpret
+the stored numbers as TCP or UDP port numbers.
+<P>
+
+<B>proto</B> only needs to be specified if a service name is used,
+and that name does not exist as a TCP service.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo bitmap:port range 0-1024
+<DT><DD>
+ipset add foo 80
+<DT><DD>
+ipset test foo 80
+<DT><DD>
+ipset del foo udp:[macon-udp]-[tn-tl-w2]
+</DL>
+<A NAME="lbAW">&nbsp;</A>
+<H3>hash:ip</H3>
+
+The <B>hash:ip</B> set type uses a hash to store IP host addresses (default) or
+network addresses. Zero valued IP address cannot be stored in a <B>hash:ip</B>
+type of set.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>netmask</B> <I>cidr</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>
+<P>
+
+Optional <B>create</B> options:
+<DL COMPACT>
+<DT><B>netmask</B> <I>cidr</I><DD>
+When the optional <B>netmask</B> parameter specified, network addresses will be 
+stored in the set instead of IP host addresses. The <I>cidr</I> prefix value must be
+between 1-32 for IPv4 and between 1-128 for IPv6. An IP address will be in the set
+if the network address, which is resulted by masking the address with the netmask,
+can be found in the set.
+Examples:
+<DT><DD>
+ipset create foo hash:ip netmask 30
+<DT><DD>
+ipset add foo 192.168.1.0/24
+<DT><DD>
+ipset test foo 192.168.1.2
+</DL>
+<A NAME="lbAX">&nbsp;</A>
+<H3>hash:mac</H3>
+
+The <B>hash:mac</B> set type uses a hash to store MAC addresses. Zero valued MAC addresses cannot be stored in a <B>hash:mac</B>
+type of set. For matches on destination MAC addresses, see COMMENTS below.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>macaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>macaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>macaddr</I>
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:mac
+<DT><DD>
+ipset add foo 01:02:03:04:05:06
+<DT><DD>
+ipset test foo 01:02:03:04:05:06
+<P>
+</DL>
+<A NAME="lbAY">&nbsp;</A>
+<H3>hash:ip,mac</H3>
+
+The <B>hash:ip,mac</B> set type uses a hash to store IP and a MAC address pairs. Zero valued MAC addresses cannot be stored in a <B>hash:ip,mac</B>
+type of set. For matches on destination MAC addresses, see COMMENTS below.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>,<I>macaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>,<I>macaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>,<I>macaddr</I>
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip,mac
+<DT><DD>
+ipset add foo 1.1.1.1,01:02:03:04:05:06
+<DT><DD>
+ipset test foo 1.1.1.1,01:02:03:04:05:06
+<P>
+</DL>
+<A NAME="lbAZ">&nbsp;</A>
+<H3>hash:net</H3>
+
+The <B>hash:net</B> set type uses a hash to store different sized IP network addresses.
+Network address with zero prefix size cannot be stored in this type of sets.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>netaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>netaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>netaddr</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+When adding/deleting/testing entries, if the cidr prefix parameter is not specified,
+then the host prefix value is assumed. When adding/deleting entries, the exact
+element is added/deleted and overlapping elements are not checked by the kernel.
+When testing entries, if a host address is tested, then the kernel tries to match
+the host address in the networks added to the set and reports the result accordingly.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a match
+always  starts  from  the smallest  size  of netblock (most specific
+prefix) to the largest one (least specific prefix) added to the set.
+When  adding/deleting IP addresses  to the set by the <B>SET</B> netfilter target,
+it  will  be added/deleted by the most specific prefix which can be found in  the
+set, or by the host prefix value if the set is empty.
+<P>
+
+The lookup time grows linearly with the number of the different prefix
+values added to the set. 
+<P>
+
+Example:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:net
+<DT><DD>
+ipset add foo 192.168.0.0/24
+<DT><DD>
+ipset add foo 10.1.0.0/16
+<DT><DD>
+ipset add foo 192.168.0/24
+<DT><DD>
+ipset add foo 192.168.0/30 nomatch
+</DL>
+<P>
+
+When matching the elements in the set above, all IP addresses will match
+from the networks 192.168.0.0/24, 10.1.0.0/16 and 192.168.0/24 except
+the ones from 192.168.0/30.
+<A NAME="lbBA">&nbsp;</A>
+<H3>hash:net,net</H3>
+
+The <B>hash:net,net</B> set type uses a hash to store pairs of different sized IP
+network addresses.  Bear  in  mind  that  the  first parameter has precedence
+over the second, so a nomatch entry could be potentially be ineffective if a more specific
+first parameter existed with a suitable second parameter.
+Network address with zero prefix size cannot be stored in this type of set.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>netaddr</I>,<I>netaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>netaddr</I>,<I>netaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>netaddr</I>,<I>netaddr</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+When adding/deleting/testing entries, if the cidr prefix parameter is not specified,
+then the host prefix value is assumed. When adding/deleting entries, the exact
+element is added/deleted and overlapping elements are not checked by the kernel.
+When testing entries, if a host address is tested, then the kernel tries to match
+the host address in the networks added to the set and reports the result accordingly.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a match
+always  starts  from  the smallest  size  of netblock (most specific
+prefix) to the largest one (least specific prefix) with the first param
+having precedence.
+When  adding/deleting IP addresses  to the set by the <B>SET</B> netfilter target,
+it  will  be  added/deleted  by  the most specific prefix which can be found in
+the set, or by the host prefix value if the set is empty.
+<P>
+
+The lookup time grows linearly with the number of the different prefix
+values added to the first parameter of the set. The number of secondary prefixes
+further increases this as the list of secondary prefixes is traversed per primary
+prefix.
+<P>
+
+Example:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:net,net
+<DT><DD>
+ipset add foo 192.168.0.0/24,10.0.1.0/24
+<DT><DD>
+ipset add foo 10.1.0.0/16,10.255.0.0/24
+<DT><DD>
+ipset add foo 192.168.0/24,192.168.54.0-192.168.54.255
+<DT><DD>
+ipset add foo 192.168.0/30,192.168.64/30 nomatch
+</DL>
+<P>
+
+When matching the elements in the set above, all IP addresses will match
+from the networks 192.168.0.0/24&lt;-&gt;10.0.1.0/24, 10.1.0.0/16&lt;-&gt;10.255.0.0/24
+and 192.168.0/24&lt;-&gt;192.168.54.0/24 except the ones from
+192.168.0/30&lt;-&gt;192.168.64/30.
+<A NAME="lbBB">&nbsp;</A>
+<H3>hash:ip,port</H3>
+
+The <B>hash:ip,port</B> set type uses a hash to store IP address and port number pairs.
+The port number is interpreted together with a protocol (default TCP) and zero
+protocol number cannot be used.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+The
+[<I>proto</I>:]<I>port</I>
+part of the elements may be expressed in the following forms, where the range
+variations are valid when adding or deleting entries:
+<DL COMPACT>
+<DT><I>portname[-portname]</I><DD>
+TCP port or range of ports expressed in TCP portname identifiers from /etc/services
+<DT><I>portnumber[-portnumber]</I><DD>
+TCP port or range of ports expressed in TCP port numbers
+<DT><B>tcp</B>|<B>sctp</B>|<B>udp</B>|<B>udplite</B>:<I>portname</I>|<I>portnumber</I>[-<I>portname</I>|<I>portnumber</I>]<DD>
+TCP, SCTP, UDP or UDPLITE port or port range expressed in port name(s) or port number(s)
+<DT><B>icmp</B>:<I>codename</I>|<I>type</I>/<I>code</I><DD>
+ICMP codename or type/code. The supported ICMP codename identifiers can always
+be listed by the help command.
+<DT><B>icmpv6</B>:<I>codename</I>|<I>type</I>/<I>code</I><DD>
+ICMPv6 codename or type/code. The supported ICMPv6 codename identifiers can always
+be listed by the help command.
+<DT><I>proto</I>:0<DD>
+All other protocols, as an identifier from /etc/protocols or number. The pseudo
+port number must be zero.
+</DL>
+<P>
+
+The <B>hash:ip,port</B> type of sets require
+two <B>src</B>/<B>dst</B> parameters of the <B>set</B> match and <B>SET</B>
+target kernel modules.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip,port
+<DT><DD>
+ipset add foo 192.168.1.0/24,80-82
+<DT><DD>
+ipset add foo 192.168.1.1,udp:53
+<DT><DD>
+ipset add foo 192.168.1.1,vrrp:0
+<DT><DD>
+ipset test foo 192.168.1.1,80
+</DL>
+<A NAME="lbBC">&nbsp;</A>
+<H3>hash:net,port</H3>
+
+The <B>hash:net,port</B> set type uses a hash to store different sized IP network
+address and port pairs. The port number is interpreted together with a protocol
+(default TCP) and zero protocol number cannot be used. Network
+address with zero prefix size is not accepted either.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ]  [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+For the <I>netaddr</I> part of the elements
+see the description at the <B>hash:net</B> set type. For the
+[<I>proto</I>:]<I>port</I>
+part of the elements see the description at the
+<B>hash:ip,port</B> set type.
+<P>
+
+When adding/deleting/testing entries, if the cidr prefix parameter is not specified,
+then the host prefix value is assumed. When adding/deleting entries, the exact
+element is added/deleted and overlapping elements are not checked by the kernel.
+When testing entries, if a host address is tested, then the kernel tries to match
+the host address in the networks added to the set and reports the result accordingly.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a  match
+always  starts  from  the smallest  size  of netblock (most specific
+prefix) to the largest one (least specific prefix) added to the set.
+When  adding/deleting IP
+addresses  to the set by the <B>SET</B> netfilter target, it  will  be
+added/deleted by the most specific prefix which can be found in  the
+set, or by the host prefix value if the set is empty.
+<P>
+
+The lookup time grows linearly with the number of the different prefix
+values added to the set. 
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:net,port
+<DT><DD>
+ipset add foo 192.168.0/24,25
+<DT><DD>
+ipset add foo 10.1.0.0/16,80
+<DT><DD>
+ipset test foo 192.168.0/24,25
+</DL>
+<A NAME="lbBD">&nbsp;</A>
+<H3>hash:ip,port,ip</H3>
+
+The <B>hash:ip,port,ip</B> set type uses a hash to store IP address, port number
+and a second IP address triples. The port number is interpreted together with a
+protocol (default TCP) and zero protocol number cannot be used.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>ip</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>ip</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>ip</I>
+<P>
+
+For the first <I>ipaddr</I> and
+[<I>proto</I>:]<I>port</I>
+parts of the elements see the descriptions at the
+<B>hash:ip,port</B> set type.
+<P>
+
+The <B>hash:ip,port,ip</B> type of sets require
+three <B>src</B>/<B>dst</B> parameters of the <B>set</B> match and <B>SET</B>
+target kernel modules.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip,port,ip
+<DT><DD>
+ipset add foo 192.168.1.1,80,10.0.0.1
+<DT><DD>
+ipset test foo 192.168.1.1,udp:53,10.0.0.1
+</DL>
+<A NAME="lbBE">&nbsp;</A>
+<H3>hash:ip,port,net</H3>
+
+The <B>hash:ip,port,net</B> set type uses a hash to store IP address, port number
+and IP network address triples. The port number is interpreted together with a
+protocol (default TCP) and zero protocol number cannot be used. Network
+address with zero prefix size cannot be stored either.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ]  [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+For the <I>ipaddr</I> and
+[<I>proto</I>:]<I>port</I>
+parts of the elements see the descriptions at the
+<B>hash:ip,port</B> set type. For the <I>netaddr</I> part of the elements
+see the description at the <B>hash:net</B> set type.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a match
+always  starts  from  the smallest  size  of netblock (most specific
+cidr) to the largest one (least specific cidr) added to the set.
+When  adding/deleting triples
+to the set by the <B>SET</B> netfilter target, it  will  be
+added/deleted by the most specific cidr which can be found in  the
+set, or by the host cidr value if the set is empty.
+<P>
+
+The lookup time grows linearly with the number of the different <I>cidr</I>
+values added to the set. 
+<P>
+
+The <B>hash:ip,port,net</B> type of sets require three <B>src</B>/<B>dst</B> parameters of
+the <B>set</B> match and <B>SET</B> target kernel modules.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip,port,net
+<DT><DD>
+ipset add foo 192.168.1,80,10.0.0/24
+<DT><DD>
+ipset add foo 192.168.2,25,10.1.0.0/16
+<DT><DD>
+ipset test foo 192.168.1,80.10.0.0/24
+</DL>
+<A NAME="lbBF">&nbsp;</A>
+<H3>hash:ip,mark</H3>
+
+The <B>hash:ip,mark</B> set type uses a hash to store IP address and packet mark pairs.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>markmask</B> <I>value</I> ] [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>ipaddr</I>,<I>mark</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>ipaddr</I>,<I>mark</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>ipaddr</I>,<I>mark</I>
+<P>
+
+Optional <B>create</B> options:
+<DL COMPACT>
+<DT><B>markmask</B> <I>value</I><DD>
+Allows you to set bits you are interested in the packet mark. This values is then used to perform bitwise AND operation for every mark added.
+markmask can be any value between 1 and 4294967295, by default all 32 bits are set.
+</DL>
+<P>
+
+The
+<I>mark</I>
+can be any value between 0 and 4294967295.
+<P>
+
+The <B>hash:ip,mark</B> type of sets require
+two <B>src</B>/<B>dst</B> parameters of the <B>set</B> match and <B>SET</B>
+target kernel modules.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:ip,mark
+<DT><DD>
+ipset add foo 192.168.1.0/24,555
+<DT><DD>
+ipset add foo 192.168.1.1,0x63
+<DT><DD>
+ipset add foo 192.168.1.1,111236
+</DL>
+<A NAME="lbBG">&nbsp;</A>
+<H3>hash:net,port,net</H3>
+
+The <B>hash:net,port,net</B> set type behaves similarly to hash:ip,port,net but accepts a
+cidr value for both the first and last parameter. Either subnet is permitted to be a /0
+should you wish to match port between all destinations.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ]  [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>netaddr</I>,[<I>proto</I>:]<I>port</I>,<I>netaddr</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+For the [<I>proto</I>:]<I>port</I>
+part of the elements see the description at the
+<B>hash:ip,port</B> set type. For the <I>netaddr</I> part of the elements
+see the description at the <B>hash:net</B> set type.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a match
+always  starts  from  the smallest  size  of netblock (most specific
+cidr) to the largest one (least specific cidr) added to the set.
+When  adding/deleting triples
+to the set by the <B>SET</B> netfilter target, it  will  be
+added/deleted by the most specific cidr which can be found in  the
+set, or by the host cidr value if the set is empty. The first subnet has
+precedence when performing the most-specific lookup, just as for hash:net,net
+<P>
+
+The lookup time grows linearly with the number of the different <I>cidr</I>
+values added to the set and by the number of secondary <I>cidr</I> values per
+primary.
+<P>
+
+The <B>hash:net,port,net</B> type of sets require three <B>src</B>/<B>dst</B> parameters of
+the <B>set</B> match and <B>SET</B> target kernel modules.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:net,port,net
+<DT><DD>
+ipset add foo 192.168.1.0/24,0,10.0.0/24
+<DT><DD>
+ipset add foo 192.168.2.0/24,25,10.1.0.0/16
+<DT><DD>
+ipset test foo 192.168.1.1,80,10.0.0.1
+</DL>
+<A NAME="lbBH">&nbsp;</A>
+<H3>hash:net,iface</H3>
+
+The <B>hash:net,iface</B> set type uses a hash to store different sized IP network
+address and interface name pairs.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>family</B> { <B>inet</B> | <B>inet6</B> } ] | [ <B>hashsize</B> <I>value</I> ] [ <B>maxelem</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>netaddr</I>,[<B>physdev</B>:]<I>iface</I>
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ]  [ <B>nomatch</B> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>netaddr</I>,[<B>physdev</B>:]<I>iface</I>
+<P>
+
+<I>TEST-ENTRY</I> := <I>netaddr</I>,[<B>physdev</B>:]<I>iface</I>
+<P>
+
+where
+<I>netaddr</I> := <I>ip</I>[/<I>cidr</I>]
+<P>
+
+For the <I>netaddr</I> part of the elements
+see the description at the <B>hash:net</B> set type.
+<P>
+
+When adding/deleting/testing entries, if the cidr prefix parameter is not specified,
+then the host prefix value is assumed. When adding/deleting entries, the exact
+element is added/deleted and overlapping elements are not checked by the kernel.
+When testing entries, if a host address is tested, then the kernel tries to match
+the host address in the networks added to the set and reports the result accordingly.
+<P>
+
+From the <B>set</B> netfilter match point of view the searching for a  match
+always  starts  from  the smallest  size  of netblock (most specific
+prefix) to the largest one (least specific prefix) added to the set.
+When  adding/deleting IP
+addresses  to the set by the <B>SET</B> netfilter target, it  will  be
+added/deleted by the most specific prefix which can be found in  the
+set, or by the host prefix value if the set is empty.
+<P>
+
+The second direction parameter of the <B>set</B> match and
+<B>SET</B> target modules corresponds to the incoming/outgoing interface:
+<B>src</B> to the incoming one (similar to the <B>-i</B> flag of iptables), while
+<B>dst</B> to the outgoing one (similar to the <B>-o</B> flag of iptables). When
+the interface is flagged with <B>physdev:</B>, the interface is interpreted
+as the incoming/outgoing bridge port.
+<P>
+
+The lookup time grows linearly with the number of the different prefix
+values added to the set.
+<P>
+
+The internal restriction of the <B>hash:net,iface</B> set type is that
+the same network prefix cannot be stored with more than 64 different interfaces
+in a single set.
+<P>
+
+Examples:
+<DL COMPACT>
+<DT><DD>
+ipset create foo hash:net,iface
+<DT><DD>
+ipset add foo 192.168.0/24,eth0
+<DT><DD>
+ipset add foo 10.1.0.0/16,eth1
+<DT><DD>
+ipset test foo 192.168.0/24,eth0
+</DL>
+<A NAME="lbBI">&nbsp;</A>
+<H3>list:set</H3>
+
+The <B>list:set</B> type uses a simple list in which you can store
+set names.
+<P>
+
+<I>CREATE-OPTIONS</I> := [ <B>size</B> <I>value</I> ] [ <B>timeout</B> <I>value</I> ] [ <B>counters</B> ] [ <B>comment</B> ] [ <B>skbinfo</B> ]
+<P>
+
+<I>ADD-ENTRY</I> := <I>setname</I> [ { <B>before</B> | <B>after</B> } <I>setname</I> ]
+<P>
+
+<I>ADD-OPTIONS</I> := [ <B>timeout</B> <I>value</I> ] [ <B>packets</B> <I>value</I> ] [ <B>bytes</B> <I>value</I> ] [ <B>comment</B> <I>string</I> ] [ <B>skbmark</B> <I>value</I> ] [ <B>skbprio</B> <I>value</I> ] [ <B>skbqueue</B> <I>value</I> ]
+<P>
+
+<I>DEL-ENTRY</I> := <I>setname</I> [ { <B>before</B> | <B>after</B> } <I>setname</I> ]
+<P>
+
+<I>TEST-ENTRY</I> := <I>setname</I> [ { <B>before</B> | <B>after</B> } <I>setname</I> ]
+<P>
+
+Optional <B>create</B> options:
+<DL COMPACT>
+<DT><B>size</B> <I>value</I><DD>
+The size of the list, the default is 8. The parameter is ignored since ipset
+version 6.24.
+</DL>
+<P>
+
+By the <B>ipset</B> command you  can add, delete and test set names in a
+<B>list:set</B> type of set.
+<P>
+
+By the <B>set</B> match or <B>SET</B> target of netfilter
+you can test, add or delete entries in the sets added to the <B>list:set</B>
+type of set. The match will try to find a matching entry in the sets and 
+the target will try to add an entry to the first set to which it can be added.
+The number of direction options of the match and target are important: sets which
+require more parameters than specified are skipped, while sets with equal
+or less parameters are checked, elements added/deleted. For example if <I>a</I> and
+<I>b</I> are <B>list:set</B> type of sets then in the command
+<DL COMPACT>
+<DT><DD>
+iptables -m set --match-set a src,dst -j SET --add-set b src,dst
+</DL>
+<P>
+
+the match and target will skip any set in <I>a</I> and <I>b</I>
+which stores data triples, but will match all sets with single or double
+data storage in <I>a</I> set and stop matching at the first successful set,
+and add src to the first single or src,dst to the first double data storage set
+in <I>b</I> to which the entry can be added. You can imagine a <B>list:set</B>
+type of set as an ordered union of the set elements. 
+<P>
+
+Please note: by the <B>ipset</B> command you can add, delete and <B>test</B>
+the setnames in a <B>list:set</B> type of set, and <B>not</B> the presence of
+a set's member (such as an IP address).
+<A NAME="lbBJ">&nbsp;</A>
+<H2>GENERAL RESTRICTIONS</H2>
+
+Zero valued set entries cannot be used with hash methods. Zero protocol value with ports
+cannot be used.
+<A NAME="lbBK">&nbsp;</A>
+<H2>COMMENTS</H2>
+
+If you want to store same size subnets from a given network
+(say /24 blocks from a /8 network), use the <B>bitmap:ip</B> set type.
+If you want to store random same size networks (say random /24 blocks), 
+use the <B>hash:ip</B> set type. If you have got random size of netblocks, 
+use <B>hash:net</B>.
+<P>
+
+Matching on destination MAC addresses using the <B>dst</B> parameter of the
+<B>set</B> match netfilter kernel modules will only work if the destination MAC
+address is available in the packet at the given processing stage, that is, it
+only applies for incoming packets in the <B>PREROUTING</B>, <B>INPUT</B> and
+<B>FORWARD</B> chains, against the MAC address as originally found in the
+received packet (typically, one of the MAC addresses of the local host). This is
+<B>not</B> the destination MAC address a destination IP address resolves to,
+after routing. If the MAC address is not available (e.g. in the <B>OUTPUT</B>
+chain), the packet will simply not match.
+<P>
+
+Backward compatibility is maintained and old <B>ipset</B> syntax is still supported.
+<P>
+
+The <B>iptree</B> and <B>iptreemap</B> set types are removed: if you refer to them,
+they are automatically replaced by <B>hash:ip</B> type of sets.
+<A NAME="lbBL">&nbsp;</A>
+<H2>DIAGNOSTICS</H2>
+
+Various error messages are printed to standard error.  The exit code
+is 0 for correct functioning.
+<A NAME="lbBM">&nbsp;</A>
+<H2>BUGS</H2>
+
+Bugs? No, just funny features. :-)
+OK, just kidding...
+<A NAME="lbBN">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="iptables.man.html">iptables</A></B>(8),
+<B><A HREF="ip6tables.man.html">ip6tables</A></B>(8)
+<B><A HREF="iptables-extensions.man.html">iptables-extensions</A></B>(8)
+<A NAME="lbBO">&nbsp;</A>
+<H2>AUTHORS</H2>
+
+Jozsef Kadlecsik wrote ipset, which is based on ippool by
+Joakim Axelsson, Patrick Schaaf and Martin Josefsson.
+<BR>
+
+Sven Wegener wrote the iptreemap type.
+<A NAME="lbBP">&nbsp;</A>
+<H2>LAST REMARK</H2>
+
+<B>I stand on the shoulders of giants.</B>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DL>
+<DT><A HREF="#lbAF">COMMANDS</A><DD>
+<DT><A HREF="#lbAG">OTHER OPTIONS</A><DD>
+</DL>
+<DT><A HREF="#lbAH">INTRODUCTION</A><DD>
+<DT><A HREF="#lbAI">GENERIC CREATE AND ADD OPTIONS</A><DD>
+<DL>
+<DT><A HREF="#lbAJ">timeout</A><DD>
+<DT><A HREF="#lbAK">counters, packets, bytes</A><DD>
+<DT><A HREF="#lbAL">comment</A><DD>
+<DT><A HREF="#lbAM">skbinfo, skbmark, skbprio, skbqueue</A><DD>
+<DT><A HREF="#lbAN">hashsize</A><DD>
+<DT><A HREF="#lbAO">maxelem</A><DD>
+<DT><A HREF="#lbAP">family { inet | inet6 }</A><DD>
+<DT><A HREF="#lbAQ">nomatch</A><DD>
+<DT><A HREF="#lbAR">forceadd</A><DD>
+</DL>
+<DT><A HREF="#lbAS">SET TYPES</A><DD>
+<DL>
+<DT><A HREF="#lbAT">bitmap:ip</A><DD>
+<DT><A HREF="#lbAU">bitmap:ip,mac</A><DD>
+<DT><A HREF="#lbAV">bitmap:port</A><DD>
+<DT><A HREF="#lbAW">hash:ip</A><DD>
+<DT><A HREF="#lbAX">hash:mac</A><DD>
+<DT><A HREF="#lbAY">hash:ip,mac</A><DD>
+<DT><A HREF="#lbAZ">hash:net</A><DD>
+<DT><A HREF="#lbBA">hash:net,net</A><DD>
+<DT><A HREF="#lbBB">hash:ip,port</A><DD>
+<DT><A HREF="#lbBC">hash:net,port</A><DD>
+<DT><A HREF="#lbBD">hash:ip,port,ip</A><DD>
+<DT><A HREF="#lbBE">hash:ip,port,net</A><DD>
+<DT><A HREF="#lbBF">hash:ip,mark</A><DD>
+<DT><A HREF="#lbBG">hash:net,port,net</A><DD>
+<DT><A HREF="#lbBH">hash:net,iface</A><DD>
+<DT><A HREF="#lbBI">list:set</A><DD>
+</DL>
+<DT><A HREF="#lbBJ">GENERAL RESTRICTIONS</A><DD>
+<DT><A HREF="#lbBK">COMMENTS</A><DD>
+<DT><A HREF="#lbBL">DIAGNOSTICS</A><DD>
+<DT><A HREF="#lbBM">BUGS</A><DD>
+<DT><A HREF="#lbBN">SEE ALSO</A><DD>
+<DT><A HREF="#lbBO">AUTHORS</A><DD>
+<DT><A HREF="#lbBP">LAST REMARK</A><DD>
+</DL>
+<HR>
+This document was created by man2html,
+using the manual pages.<BR>
+Time: 12:25:43 GMT, July 29, 2019
+</BODY>
+</HTML>
