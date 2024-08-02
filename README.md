@@ -3,10 +3,6 @@
 ## Introduction
 ezIPSet is a pure Python library that provides a convenient way to manage ipset rules. It allows you to interact with IPSet using Python code, making it easier to create, modify, and delete IPSet sets. This library includes all the functions existing in IPSet and works with protocols 6 and 7 of IPSet.
 
-IPSet is an extension for IPTables and allows you to manipulate tens of thousands of rules. To check if you have this extension installed on your Linux distribution, type `ipset --version`. If you get an error, you can easily install it with the command below.
-
-For available methods in `ipset`, please refer to the [https://ipset.netfilter.org/ipset.man.html](https://ipset.netfilter.org/ipset.man.html).
-
 ## Installation of ezIPSet Library
 
 ```shell
@@ -14,6 +10,10 @@ pip install ezIPSet
 ```
 
 ## Installation of ipset extension for iptables
+
+IPSet is an extension for IPTables and allows you to manipulate tens of thousands of rules. To check if you have this extension installed on your Linux distribution, type `ipset --version`. If you get an error, you can easily install it with the command below.
+
+For available methods in `ipset`, please refer to the IPSet website [https://ipset.netfilter.org/](https://ipset.netfilter.org/) or IPSet man pages [https://ipset.netfilter.org/ipset.man.html](https://ipset.netfilter.org/ipset.man.html).
 
 > *Installing this extension has no impact on the operation of IPTables.*
 
@@ -131,16 +131,16 @@ False
 
 - ```def __init__(self, ipset_command:str='ipset', command_timeout:int=5, raise_on_errors:bool=True, debug:bool=False, **kwargs):```
 
-    - `ipset_command`: If the operating system's ipset command has been renamed, then provide the new name here. The command specified here will be inserted at the beginning of every command line you execute.
-    - `command_timeout`: self explanatory. You can change this value at any time by accessing the `command_timeout` property without having to create the object again. If you're working with multiple 50K rule sets, you may need to increase this to 10 seconds or more. In stress tests, everything ran in under 2~3 seconds.
-    - `raise_on_errors`: This is a good option to avoid exceptions. If you prefer to handle exceptions by your own, set this option to `True`, otherwise keep it as `False` and the function returns will never raise an exception, it will always be `True` or `False`.
-    - `debug`: In this option, the executed commands and the outputs are displayed with a highlighted color in case you need to resolve any atypical situation that may be occurring with the library. Before opening an issue, run with this flag as `True` to monitor the behavior. It is also possible to activate the debug flag without touching the code by exporting an environment variable like this: `export EZIPSET_DEBUG=1`
+    - **`ipset_command`**: If the operating system's ipset command has been renamed, then provide the new name here. The command specified here will be inserted at the beginning of every command line you execute.
+    - **`command_timeout`**: self explanatory. You can change this value at any time by accessing the `command_timeout` property without having to create the object again. If you're working with multiple 50K rule sets, you may need to increase this to 10 seconds or more. In stress tests, everything ran in under 2~3 seconds.
+    - **`raise_on_errors`**: This is a good option to avoid exceptions. If you prefer to handle exceptions by your own, set this option to `True`, otherwise keep it as `False` and the function returns will never raise an exception, it will always be `True` or `False`.
+    - **`debug`**: In this option, the executed commands and the outputs are displayed with a highlighted color in case you need to resolve any atypical situation that may be occurring with the library. Before opening an issue, run with this flag as `True` to monitor the behavior. It is also possible to activate the debug flag without touching the code by exporting an environment variable like this: `export EZIPSET_DEBUG=1`
 
     With each command executed, 3 properties are populated automatically:
 
-    - `set_names`: This is the current list of names of all existing ipset sets. You do not need to keep calling the get_set_names() function. This property changes every time you create, rename or destroy a set.
-    - `last_command_elapsed_time`: Here the elapsed time of the last command executed is recorded, in case you need to keep track of the elapsed times and adjust the `command_timeout` property if necessary.
-    - `last_command_output`: If you chose `raise_on_errors=False` and some command returned "False", access this property to see the error message that the IPSet returned.
+    - **`set_names`**: This is the current list of names of all existing ipset sets. You do not need to keep calling the get_set_names() function. This property changes every time you create, rename or destroy a set.
+    - **`last_command_elapsed_time`**: Here the elapsed time of the last command executed is recorded, in case you need to keep track of the elapsed times and adjust the `command_timeout` property if necessary.
+    - **`last_command_output`**: If you chose `raise_on_errors=False` and some command returned "False", access this property to see the error message that the IPSet returned.
 
     When manipulating many dictionaries and lists, you need to pay attention to the memory consumption of these variables. A sporadic call or two will not cause problems, but in an application that manages firewall rules hundreds or thousands of times per hour, this becomes a problem. With ezIPSet you can use it as a context and release all the memory used by the library as soon as you leave the context block. Example:
 
@@ -148,9 +148,75 @@ False
     with ezIPSet() as ipset:
         all_sets = ipset.get_all_sets()
         print(ipset.set_names)
+        print(json.dumps(ipset.VALID_SET_TYPES,indent=3,sort_keys=False))
     ```
 
 ### Methods
+
+All methods have a doc string detailing all parameters. For more info, please refer to the [IPSet man page](https://ipset.netfilter.org/ipset.man).
+
+- **`get_ezipset_version()`**: Returns the version of the ezIPSet library.
+
+- **`get_ipset_version()`**: Returns the current version of IPSet. Or you can call the properties: `ipset().version` or `ipset().protocol`
+
+- **`save(to_file,gzipped=False,compression_level=9,overwrite_if_exists=False)`**: Saves the current IPSet rules to a file if the parameter `to_file` is given, or returns the output if `to_file` is None.
+
+- **`restore(file_to_restore:str,skip_create_sets=False,skip_add_entries=False,ignore_if_exists=False)`**: Restores the IPSet rules from a file. You can skip the 'create' commands in the file or skip the 'add' commands in the file and use a compressed file also.
+
+- **`destroy_set(setname)`**: Destroys an IPSet set. *There is no UNDO action!*
+
+- **`destroy_all()`**: Self explanatory. *There is no UNDO action!*
+
+- **`rename_set(old_setname,new_setname)`**: Renames an IPSet set
+
+- **`swap_set(setname_from,setname_to)`**: Swaps two IPSet sets. The referred sets must exist and compatible type of sets can be swapped only.
+
+- **`flush_set(setname)`**: Deletes all members of an IPSet set.
+
+- **`flush_all()`**: Self explanatory. *There is no UNDO action!*
+
+- **`get_set_names()`**: Returns only a list with the names of the system's IPSet sets.
+
+- **`get_set(setname,with_members=True,sorted=False)`**: Returns a dictionary with all the information and members of the set specified in the `setname` parameter.
+
+- **`get_set_header(setname)`**: Returns a dictionary with only the header information of the set specified in the `setname` parameter.
+
+- **`get_set_members(setname,sorted=False)`**: Returns a dictionary with only the members information of the set specified in the `setname` parameter.
+
+- **`get_all_sets(with_members=True,sorted=False)`**: Returns a list of dictionaries containing all information about all IPSets in the system.
+
+- **`add_entry(set_name,entry,timeout=None,comment=None,packets=None,bytes=None,skbmark=None,skbprio=None,skbqueue=None,ignore_if_exists=False)`**: Adds a member to the IPSet given in the setname parameter. Depending on how the set was created, you can pass other parameters if desired.
+
+- **`test_entry(set_name,entry,raise_on_test_failed=False)`**: Tests if an entry is in the specified set. The `raise_on_test_failed` parameter overrides the `raise_on_errors` parameter that was set when the object was created, in case you don't want to handle an exception at the time you want to test whether the member exists or not.
+
+- **`del_entry(set_name,entry,ignore_if_not_exists=False,raise_if_not_exists=False)`**: Deletes a member of an IPSet set. The `ignore_if_not_exists` parameter make the function always return True. And the `raise_if_not_exists` parameter overrides the one defined at the creation of the object in case you do not want to handle an exception when deleting a member of the set.
+
+- **`create_set(set_name,set_type,family,timeout=None,with_comment=False,with_counters=False,with_skbinfo=False,nomatch=False,forceadd=False,wildcard=False,hashsize=None,maxelem=None,bucketsize=None,ignore_if_exists=False)`**: Creates a set according to the parameters provided. You can see the `ezIPSet().VALID_SET_TYPES` property, which is a dictionary with all accepted set_types and possible combinations of extra parameters accepted. See the [IPSet man page](https://ipset.netfilter.org/ipset.man) for more details, it is very complete and easy to understand.
+
+- **`ezIPSet().VALID_SET_TYPES`**: is a property with all accepted set_types and possible combinations.
+    ```
+    with ezIPSet() as ipset:
+        print(json.dumps(ipset.VALID_SET_TYPES,indent=3,sort_keys=False))
+
+    {
+    "hash:ip": [
+        "counters",
+        "comment",
+        "forceadd",
+        "skbinfo",
+        "bucketsize"
+    ],
+    "hash:ip,mac": [
+        "bucketsize"
+    ],
+    "hash:ip,mark": [
+        "forceadd",
+        "skbinfo",
+        "bucketsize"
+    ],
+    ...
+    }
+    ```
 
 ## ezIPSet Minimal Library
 
